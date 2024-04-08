@@ -1,0 +1,15 @@
+.filters{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0px;
+}
+
+.filters .control-label{
+    text-align: left;
+}
+
+.filters .form-group {
+    flex: 1 0 50%; /* Ajusta el porcentaje según el número de columnas que desees */
+    padding: 0 10px;
+}
