@@ -3,6 +3,7 @@ const iconv = require('iconv-lite');
 const { createClient } = require('@clickhouse/client');
 
 const OFFSET = 0;
+const LIMIT = 500000;
 
 const clickhouse = createClient({
   database: 'padron',
@@ -22,6 +23,21 @@ const mysqlConnection = mysql.createConnection({
   password: 'jbjzVeaBSiapOrFi',
   database: 'padron'
 });
+
+const constTotalRowsMysql = async () => {
+
+  return new Promise((resolve, reject) => {
+    const query = `SELECT COUNT(*) AS total FROM padron`;
+    mysqlConnection.query(query, (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+
+}
 
 
 // Funcion para obtener 1000 filas de mysql padron, que reciba un limit de 1000 y un offset
@@ -73,9 +89,11 @@ function fixEncoding(str) {
 // Sanear cada string de mysql con la funcion fixEncoding
 
 const replicate = async () => {
+    let totalRows = await constTotalRowsMysql();
     let offset = OFFSET || 0;
-    let limit = 100000;
+    let limit = LIMIT || 1000;
     let results = await getMysqlData(limit, offset);
+    console.log("Total de filas en MySQL: ", totalRows[0].total);
     while (results.length > 0) {
 
         // Armamos el JSON requerido
