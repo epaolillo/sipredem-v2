@@ -3,7 +3,7 @@ const iconv = require('iconv-lite');
 const { createClient } = require('@clickhouse/client');
 
 const OFFSET = 0;
-const LIMIT = 1_000_000;
+const LIMIT = 100_000;
 
 const clickhouse = createClient({
   database: 'padron',
