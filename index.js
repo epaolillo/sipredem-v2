@@ -9,6 +9,7 @@ const { createClient } = require('@clickhouse/client');
 
 const clickhouse = createClient({
     database: 'padron',
+    password: process.env.CLICKHOUSE_PASSWORD,
     clickhouse_settings: {
       // https://clickhouse.com/docs/en/operations/settings/settings#async-insert
       async_insert: 1,
