@@ -353,7 +353,7 @@ const mapa = [
                     {
                         "_id": "66134fd690a68119101b6a59",
                         "IdDistrito": 1,
-                        "Distrito": "Ciudad Autónoma de Buenos Aires",
+                        "Distrito": "CIUDAD DE BUENOS AIRES",
                         "SeccionesProvinciales": [
                             {
                                 "_id": "66134fd690a68119101b6a5a",
