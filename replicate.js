@@ -46,7 +46,7 @@ const getMysqlData = (limit, offset, retries = 10) => {
       const query = `SELECT * FROM padron LIMIT ${limit} OFFSET ${offset}`;
       mysqlConnection.query(query, (err, results) => {
         if (err) {
-          if (err.code === 'ER_SERVER_SHUTDOWN' && retries > 0) {
+          if (retries > 0) {
             console.log(`Error de servidor apagado, reintentando en 10 segundos... (${retries} intentos restantes)`);
             setTimeout(() => {
               resolve(getMysqlData(limit, offset, retries - 1));
