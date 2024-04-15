@@ -144,6 +144,7 @@ app.get('/resultados_2023', async (req, res) => {
         // Parámetros de ordenación
         const sortField = req.query._sort || 'NU_MATRICULA';
         const sortOrder = req.query._order === 'DESC' ? 'DESC' : 'ASC';
+        let complete_response = [];
 
         let custom_query = req.query.custom_query?? null;
 
@@ -189,7 +190,7 @@ app.get('/resultados_2023', async (req, res) => {
             format: 'JSONEachRow',
         };
 
-        console.log("Query: ", query.query);
+        
 
         // Ejecuta la consulta para obtener las personas
         const personas = await queryCh(query);
@@ -215,17 +216,23 @@ app.get('/resultados_2023', async (req, res) => {
             const seccion = extraerPrimerosDigitos(persona.TX_SECCION);
             const mesa = persona.NUMERO_MESA;
 
-            console.log("Obtener resultados de ", distrito, seccion, mesa);
+
             try {
                 const resultados = await obtenerResultados(distrito, seccion, mesa);
-                persona.resultados = resultados;
+
+                persona = {...persona, ...resultados};
+
+                complete_response.push(persona);
+                console.log(persona)
+
             } catch (error) {
                 persona.resultados = '';
             }
         }
 
+        console.log(complete_response)
 
-        res.json(personas);
+        res.json(complete_response);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error interno del servidor');
@@ -274,8 +281,16 @@ async function obtenerResultados(distrito, seccion, mesa) {
     try {
         const response = await axios.get(url);
         const resultados = response.data;
-        const stringResultados = resultados.valoresTotalizadosPositivos.map(agr => `${agr.nombreAgrupacion}: ${agr.votosPorcentaje}%`).join(', ');
-        return stringResultados;
+    
+        const objetoResultados = {};
+
+        for (const agr of resultados.valoresTotalizadosPositivos) {
+            const sigla = agr.nombreAgrupacion.split(' ').map(palabra => palabra[0].toLowerCase()).join('');
+            objetoResultados[`${sigla}_2023`] = agr.votosPorcentaje;
+        }
+
+
+        return objetoResultados;
     } catch (error) {
         console.error('Error al obtener resultados:', error);
         return '';
