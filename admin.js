@@ -29,6 +29,7 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
 
     persona.listView()
     .title('Lista de Personas')
+    .perPage(30)
     .fields([
         /* Estos campos
         ┌─DISTRITO─┬─TX_TIPO_EJEMPLAR─┬─NU_MATRICULA─┬─TX_APELLIDO─┬─TX_NOMBRE───┬─TX_CLASE─┬─TX_GENERO─┬─TX_DOMICILIO───────────────────────┬─TX_SECCION─┬─TX_CIRCUITO─────────┬─TX_LOCALIDAD───────────────────────────────────────┬─TX_CODIGO_POSTAL─┬─TX_TIPO_NACIONALIDAD─┬─NUMERO_MESA─┬─NU_ORDEN_MESA─┬─ESTBLECIMIENTO──────────────┬─DIRECCION_ESTABLECIMIENTO─
