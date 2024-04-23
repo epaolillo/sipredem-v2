@@ -108,7 +108,7 @@ app.get('/personas', async (req, res) => {
         const whereClause = filters ? `WHERE ${filters}` : '';
 
         const query = {
-            query: `SELECT * FROM persona ${whereClause} ORDER BY ${sortField} ${sortOrder} LIMIT ${limit} OFFSET ${start}`,
+            query: `SELECT * FROM persona ${whereClause} ORDER BY ${sortField} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`,
             format: 'JSONEachRow',
         };
 
@@ -187,7 +187,7 @@ app.get('/resultados_2023', async (req, res) => {
         const whereClause = filters ? `WHERE ${filters}` : '';
 
         const query = {
-            query: `SELECT * FROM persona ${whereClause} ORDER BY ${sortField} ${sortOrder} LIMIT ${limit} OFFSET ${start}`,
+            query: `SELECT * FROM persona ${whereClause} ORDER BY ${sortField} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`,
             format: 'JSONEachRow',
         };
 
