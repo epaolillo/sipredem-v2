@@ -59,7 +59,7 @@ app.get('/personas', async (req, res) => {
     try {
         // Parámetros de paginación
         const page = parseInt(req.query._page) || 1;
-        const limit = parseInt(req.query._limit) || 10;
+        const limit = parseInt(req.query._limit) || 5000000;
         const start = (page - 1) * limit;
 
         // Parámetros de ordenación
