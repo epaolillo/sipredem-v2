@@ -86,14 +86,14 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     .sortField('NU_MATRICULA')
     .sortDir('ASC')
 
-    persona.listView()
-        .exportFields([
-            persona.listView().fields().sortField('NU_MATRICULA').sortDir('ASC')// Reutiliza campos de la vista de lista
-        ])
-        .exportOptions({
-            quotes: true,
-            delimiter: ';'
-        })
+    
+    .exportFields([
+        persona.listView().fields() // Reutiliza campos de la vista de lista
+    ])
+    .exportOptions({
+        quotes: true,
+        delimiter: ';'
+    })
     
 
     admin.addEntity(persona);
