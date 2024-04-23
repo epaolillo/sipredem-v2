@@ -86,6 +86,13 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     .sortField('NU_MATRICULA')
     .sortDir('ASC')
 
+    .exportFields([
+        persona.listView().fields(), // fields() without arguments returns the list of fields. That way you can reuse fields from another view to avoid repetition
+    ])
+    .exportOptions({
+        quotes: true,
+        delimiter: ';'
+    });
     
 
     admin.addEntity(persona);
