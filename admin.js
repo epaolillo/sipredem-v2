@@ -93,7 +93,8 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
         .exportOptions({
             quotes: true,
             delimiter: ';'
-        });
+        }).sortField('NU_MATRICULA')
+          .sortDir('ASC')
     
 
     admin.addEntity(persona);
