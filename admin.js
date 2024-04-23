@@ -107,6 +107,7 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
 
     resultados.listView()
     .title('Resultados de elecciones 2023')
+    .perPage(30)
     .fields([
         /* Estos campos
         ┌─DISTRITO─┬─TX_TIPO_EJEMPLAR─┬─NU_MATRICULA─┬─TX_APELLIDO─┬─TX_NOMBRE───┬─TX_CLASE─┬─TX_GENERO─┬─TX_DOMICILIO───────────────────────┬─TX_SECCION─┬─TX_CIRCUITO─────────┬─TX_LOCALIDAD───────────────────────────────────────┬─TX_CODIGO_POSTAL─┬─TX_TIPO_NACIONALIDAD─┬─NUMERO_MESA─┬─NU_ORDEN_MESA─┬─ESTBLECIMIENTO──────────────┬─DIRECCION_ESTABLECIMIENTO─
@@ -185,20 +186,32 @@ const query = function (query) {
 
 myApp.config(['RestangularProvider', function (RestangularProvider) {
     RestangularProvider.addFullRequestInterceptor(function(element, operation, what, url, headers, params) {
-        if (operation == "getList") {
-            // custom pagination params
-            if (params._page) {
-                params._limit = params._page * params._perPage;
+        // Solo modificar las peticiones para obtener listas de recursos
+        if (operation === "getList") {
+            // Verifica si los parámetros de paginación existen
+            if (params._page && params._perPage) {
+                // Calcula el OFFSET basado en la página actual y la cantidad de elementos por página
+                var offset = (params._page - 1) * params._perPage;
+                var limit = params._perPage;
+
+                // Ajusta los parámetros de la consulta para usar LIMIT y OFFSET
+                params._limit = limit;
+                params._offset = offset;
+
+                // Limpia los parámetros de paginación originales para evitar confusión en la API
+                delete params._page;
+                delete params._perPage;
             }
-            delete params._perPage;
-            // custom sort params
+
+            // Verifica y ajusta los parámetros de ordenación si están presentes
             if (params._sortField) {
-                params._sort = params._sortField;
-                params._order = params._sortDir;
+                params._sort = params._sortField;  // Asume que tu API espera un parámetro '_sort'
+                params._order = params._sortDir;   // Asume que tu API espera un parámetro '_order'
                 delete params._sortField;
                 delete params._sortDir;
             }
-            // custom filters
+
+            // Filtrado personalizado: convierte filtros de ng-admin a algo utilizable por tu API si es necesario
             if (params._filters) {
                 for (var filter in params._filters) {
                     params[filter] = params._filters[filter];
@@ -206,6 +219,8 @@ myApp.config(['RestangularProvider', function (RestangularProvider) {
                 delete params._filters;
             }
         }
+
+        // Asegúrate de retornar los parámetros ajustados
         return { params: params };
     });
 }]);

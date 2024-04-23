@@ -58,9 +58,8 @@ app.get('/personas', async (req, res) => {
 
     try {
         // Parámetros de paginación
-        const page = parseInt(req.query._page) || 1;
-        const limit = parseInt(req.query._limit) || 5000000;
-        const start = (page - 1) * limit;
+        const limit = parseInt(req.query._limit) || 10;  // Uso un valor por defecto más razonable
+        const offset = parseInt(req.query._offset) || 0;
 
         // Parámetros de ordenación
         let sortField = req.query._sort || 'NU_MATRICULA';
@@ -73,7 +72,7 @@ app.get('/personas', async (req, res) => {
 
         if(custom_query){
 
-            custom_query += ` ORDER BY ${sortField} LIMIT ${limit} OFFSET ${start}`
+            custom_query += ` ORDER BY ${sortField} LIMIT ${limit} OFFSET ${offset}`
     
             const query = {
                 query: custom_query,
@@ -140,9 +139,8 @@ app.get('/resultados_2023', async (req, res) => {
 
     try {
         // Parámetros de paginación
-        const page = parseInt(req.query._page) || 1;
-        const limit = parseInt(req.query._limit) || 10;
-        const start = (page - 1) * limit;
+        const limit = parseInt(req.query._limit) || 10;  // Uso un valor por defecto más razonable
+        const offset = parseInt(req.query._offset) || 0;
 
         // Parámetros de ordenación
         const sortField = req.query._sort || 'NU_MATRICULA';
@@ -153,7 +151,7 @@ app.get('/resultados_2023', async (req, res) => {
 
         if(custom_query){
 
-            custom_query += ` ORDER BY ${sortField} LIMIT ${limit} OFFSET ${start}`
+            custom_query += ` ORDER BY ${sortField} LIMIT ${limit} OFFSET ${offset}`
     
             const query = {
                 query: custom_query,
