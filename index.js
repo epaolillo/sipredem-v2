@@ -58,7 +58,7 @@ app.get('/personas', async (req, res) => {
 
     try {
         // Parámetros de paginación
-        const limit = parseInt(req.query._limit) || 10;  // Uso un valor por defecto más razonable
+        const limit = parseInt(req.query._limit) || 5000000;  // Uso un valor por defecto más razonable
         const offset = parseInt(req.query._offset) || 0;
 
         // Parámetros de ordenación
@@ -139,7 +139,7 @@ app.get('/resultados_2023', async (req, res) => {
 
     try {
         // Parámetros de paginación
-        const limit = parseInt(req.query._limit) || 10;  // Uso un valor por defecto más razonable
+        const limit = parseInt(req.query._limit) || 5000000;  // Uso un valor por defecto más razonable
         const offset = parseInt(req.query._offset) || 0;
 
         // Parámetros de ordenación
