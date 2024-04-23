@@ -63,7 +63,10 @@ app.get('/personas', async (req, res) => {
         const start = (page - 1) * limit;
 
         // Parámetros de ordenación
-        const sortField = req.query._sort || 'NU_MATRICULA';
+        let sortField = req.query._sort || 'NU_MATRICULA';
+        if(sortField = 'id'){
+            sortField = 'NU_MATRICULA';
+        }
         const sortOrder = req.query._order === 'DESC' ? 'DESC' : 'ASC';
 
         let custom_query = req.query.custom_query?? null;
