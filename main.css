@@ -13,3 +13,8 @@
     flex: 1 0 50%; /* Ajusta el porcentaje según el número de columnas que desees */
     padding: 0 10px;
 }
+
+ma-datagrid{
+    display: block;
+    overflow-x: scroll;
+}

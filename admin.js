@@ -35,7 +35,6 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
         ┌─DISTRITO─┬─TX_TIPO_EJEMPLAR─┬─NU_MATRICULA─┬─TX_APELLIDO─┬─TX_NOMBRE───┬─TX_CLASE─┬─TX_GENERO─┬─TX_DOMICILIO───────────────────────┬─TX_SECCION─┬─TX_CIRCUITO─────────┬─TX_LOCALIDAD───────────────────────────────────────┬─TX_CODIGO_POSTAL─┬─TX_TIPO_NACIONALIDAD─┬─NUMERO_MESA─┬─NU_ORDEN_MESA─┬─ESTBLECIMIENTO──────────────┬─DIRECCION_ESTABLECIMIENTO─
         */
 
-        nga.field('DISTRITO').label('Distrito'),
         nga.field('NU_MATRICULA').label('DNI'),
         nga.field('TX_APELLIDO').label('Apellido'),
         nga.field('TX_NOMBRE').label('Nombre'),
@@ -113,7 +112,6 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
         ┌─DISTRITO─┬─TX_TIPO_EJEMPLAR─┬─NU_MATRICULA─┬─TX_APELLIDO─┬─TX_NOMBRE───┬─TX_CLASE─┬─TX_GENERO─┬─TX_DOMICILIO───────────────────────┬─TX_SECCION─┬─TX_CIRCUITO─────────┬─TX_LOCALIDAD───────────────────────────────────────┬─TX_CODIGO_POSTAL─┬─TX_TIPO_NACIONALIDAD─┬─NUMERO_MESA─┬─NU_ORDEN_MESA─┬─ESTBLECIMIENTO──────────────┬─DIRECCION_ESTABLECIMIENTO─
         */
 
-        nga.field('DISTRITO').label('Distrito'),
         nga.field('NU_MATRICULA').label('DNI'),
         nga.field('TX_APELLIDO').label('Apellido'),
         nga.field('TX_NOMBRE').label('Nombre'),
