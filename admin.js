@@ -137,7 +137,7 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
         nga.field('jpec_2023').label('JXC 2023'),
         nga.field('uplp_2023').label('UPP 2023'),
         nga.field('hpnp_2023').label('HPN 2023'),
-        nga.field('fdiydt-u_2023').label('FIT 2023')
+        nga.field('fdiydt_2023').label('FIT 2023')
 
 
     ]).filters([

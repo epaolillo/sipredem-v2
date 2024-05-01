@@ -87,34 +87,7 @@ async function resultados_2023(req, res) {
         res.set('X-Total-Count', total);
         res.set('Access-Control-Expose-Headers', 'X-Total-Count');
 
-        
-        // Para cada persona vamos a buscar los datos a la API
-        for (let persona of personas) {
-            let distrito = null;
-            try{
-                distrito = obtenerIdDistrito(mapa, persona.TX_LOCALIDAD);
-            }
-            catch(e){
-                console.log("Error al obtener distrito", e);
-            }
-
-            const seccion = extraerPrimerosDigitos(persona.TX_SECCION);
-            const mesa = persona.NUMERO_MESA;
-
-
-            try {
-                const resultados = await obtenerResultados(2, 105, mesa);
-
-                persona = {...persona, ...resultados};
-
-                complete_response.push(persona);
-
-            } catch (error) {
-                persona.resultados = '';
-            }
-        }
-
-        res.json(complete_response);
+        res.json(personas);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error interno del servidor');
