@@ -49,7 +49,13 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
         nga.field('NUMERO_MESA').label('N° Mesa'),
         nga.field('NU_ORDEN_MESA').label('Orden Mesa'),
         nga.field('ESTBLECIMIENTO').label('Establecimiento'),
-        nga.field('DIRECCION_ESTABLECIMIENTO').label('Direccion Establecimiento')
+        nga.field('DIRECCION_ESTABLECIMIENTO').label('Direccion Establecimiento'),
+        nga.field('lla_2023').label('LLA 2023'),
+        nga.field('jpec_2023').label('JXC 2023'),
+        nga.field('uplp_2023').label('UPP 2023'),
+        nga.field('hpnp_2023').label('HPN 2023'),
+        nga.field('fdiydt_2023').label('FIT 2023')
+
 
 
     ]).filters([
