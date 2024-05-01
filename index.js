@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 const personas = require('./models/personas.js');
-const resultados_2023 = require('./models/resultados_2023.js');
+const { resultados_2023 } = require('./models/resultados_2023.js');
 require('dotenv').config();
 
 const cookieParser = require('cookie-parser');
