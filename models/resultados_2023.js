@@ -136,7 +136,10 @@ async function obtenerResultados(distrito, seccion, mesa) {
         const objetoResultados = {};
 
         for (const agr of resultados.valoresTotalizadosPositivos) {
-            const sigla = agr.nombreAgrupacion.split(' ').map(palabra => palabra[0].toLowerCase()).join('');
+            let sigla = agr.nombreAgrupacion.split(' ').map(palabra => palabra[0].toLowerCase()).join('');
+            if(sigla == 'fdiydt-u'){
+                sigla = 'fdiydt';
+            }
             objetoResultados[`${sigla}_2023`] = agr.votosPorcentaje;
         }
 
@@ -181,4 +184,4 @@ function obtenerIdDistrito(mapa, nombre) {
     return null; // Devuelve null si no se encuentra el nombre
 }
 
-module.exports = resultados_2023;
+module.exports = { resultados_2023, obtenerResultados, extraerPrimerosDigitos, obtenerIdDistrito };
