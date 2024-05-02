@@ -5,68 +5,75 @@ const path = require('path');
 
 require('dotenv').config();
 
-
 async function obtenerDomicilios() {
-    const query =  {
-        query: `SELECT DISTINCT TX_DOMICILIO as direccion FROM persona WHERE lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%') LIMIT 1000`,
-        format: 'JSONEachRow',
-    };
+    let offset = 0;
+    const limit = 10;
 
-    const resultados = await queryCh(query);
-    const array_domicilio = resultados.map(row => row.direccion);
-    const direcciones = await normalizarUnaDireccion(array_domicilio);
+    console.log("Corriendo domicilios")
+    while (true) {
+        const fetchQuery = {
+            query: `SELECT DISTINCT TX_DOMICILIO as direccion FROM persona WHERE lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%') LIMIT ${limit} OFFSET ${offset}`,
+            format: 'JSONEachRow',
+        };
 
-    const direcciones_encontradas = direcciones.resultados.filter(direccion => direccion.cantidad > 0);
+        const direccionesDB = await queryCh(fetchQuery);
+        if (direccionesDB.length === 0) {
+            break; // Salimos del bucle si no hay más datos que procesar
+        }
 
-    const direcciones_mapeadas = direcciones.resultados.map((direccion,index) => {
-        if(direccion?.direcciones[0]?.ubicacion?.lat){
-            return {
-                direccion: array_domicilio[index],
-                coordenadas: direccion?.direcciones[0]?.ubicacion?.lat + ', ' + direccion?.direcciones[0]?.ubicacion?.lon
+        console.log(`Tenemos un total de ${direccionesDB.length} direcciones para procesar.`)
+        console.log(direccionesDB.map(row => row.direccion))
+        const direccionesNormalizadas = await normalizarUnLoteDirecciones(direccionesDB.map(row => row.direccion));
+
+        console.log(`Direcciones normalizadas: ${direccionesNormalizadas?.length}`)
+        // Asegúrate de que las columnas existan
+        const alterQuery = {
+            query: `ALTER TABLE persona ADD COLUMN IF NOT EXISTS lat Float32, ADD COLUMN IF NOT EXISTS lon Float32`,
+            format: 'JSONEachRow'
+        };
+        await queryCh(alterQuery);
+
+        for (let i = 0; i < direccionesNormalizadas.length; i++) {
+            const resultado = direccionesNormalizadas[i];
+            if (resultado && resultado.direcciones && resultado.direcciones.length > 0) {
+                const lat = resultado.direcciones[0].ubicacion.lat;
+                const lon = resultado.direcciones[0].ubicacion.lon;
+                const dir = direccionesDB[i].direccion;  // Utiliza la dirección directamente desde el array original
+
+                // Actualiza las coordenadas en la base de datos
+                const updateQuery = {
+                    query: `UPDATE persona SET lat = ${lat}, lon = ${lon} WHERE TX_DOMICILIO = '${dir.replace(/'/g, "''")}' AND lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%')`,
+                    format: 'JSONEachRow'
+                };
+                
+                await queryCh(updateQuery);
             }
         }
-        else{
-            return {
-                direccion: array_domicilio[index],
-                coordenadas: 'No encontradas'
-            }
-        }
-    });
 
-
-    console.log(`Direcciones encontradas: ${direcciones_encontradas.length}`)
-    console.log(`Direcciones totales: ${array_domicilio.length}`)
-
-
-    console.log(direcciones_mapeadas);
+        offset += limit; // Incrementa el offset para la siguiente iteración
+    }
 }
 
-async function normalizarUnaDireccion(direcciones) {
-    const url = 'https://apis.datos.gob.ar/georef/api/direcciones';
 
-    // hago una query a la api de direcciones donde provincia y localidad son fijas
-    // y la dirección es la que se pasa por parámetro
+async function normalizarUnLoteDirecciones(direcciones) {
+    const url = 'https://apis.datos.gob.ar/georef/api/direcciones';
     const data = {
         direcciones: direcciones.map(direccion => ({
-            direccion: direccion,
-            max: "1",
+            direccion,
             provincia: "buenos aires",
             localidad: "san fernando"
         }))
     };
 
-    console.log("Yendo a buscar a la api de direcciones...")
-    console.table(direcciones)
 
-    const response = await axios.post(url, data, {
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
+        const response = await axios.post(url, data, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        // Extrae el resultado normalizado de la respuesta
+        return response.data.resultados;
 
-    // Extrae el resultado normalizado de la respuesta
-
-    return response?.data // Asegúrate de ajustar esta línea según la estructura real de la respuesta 
 }
 
 obtenerDomicilios();
