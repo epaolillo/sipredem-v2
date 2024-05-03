@@ -21,7 +21,7 @@ async function obtenerDomicilios() {
         */
 
         const alterQuery = {
-            query: `ALTER TABLE persona ADD COLUMN IF NOT EXISTS lat Float64, ADD COLUMN IF NOT EXISTS lon Float64`,
+            query: `ALTER TABLE persona ADD COLUMN IF NOT EXISTS m2 Float32`,
             format: 'JSONEachRow'
         };
         await queryCh(alterQuery);
@@ -33,7 +33,7 @@ async function obtenerDomicilios() {
 
     while (true) {
         const fetchQuery = {
-            query: `SELECT DISTINCT TX_DOMICILIO as direccion FROM persona WHERE lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%') AND lat = 0 AND lon = 0 LIMIT ${limit} OFFSET ${offset}`,
+            query: `SELECT DISTINCT TX_DOMICILIO as direccion FROM persona WHERE lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%') AND lat != 0 AND lon != 0 LIMIT ${limit} OFFSET ${offset}`,
             format: 'JSONEachRow',
         };
 
@@ -46,33 +46,17 @@ async function obtenerDomicilios() {
 
         console.log(`Tenemos un total de ${direccionesDB.length} direcciones para procesar.`)
     
-        const direccionesNormalizadas = await normalizarUnLoteDirecciones(direccionesDB.map(row => row.direccion));
-
-        console.log(`Direcciones normalizadas: ${direccionesNormalizadas?.length}`)
-
-
-        for (let i = 0; i < direccionesNormalizadas.length; i++) {
-            const resultado = direccionesNormalizadas[i];
-            if (resultado && resultado.direcciones && resultado.direcciones.length > 0) {
-                const lat = resultado.direcciones[0].ubicacion.lat;
-                const lon = resultado.direcciones[0].ubicacion.lon;
-                const dir = direccionesDB[i].direccion;  // Utiliza la dirección directamente desde el array original
-
-                // Actualiza las coordenadas en la base de datos
-                const updateQuery = {
-                    query: `ALTER TABLE padron.persona UPDATE lat = ${lat}, lon = ${lon} WHERE TX_DOMICILIO = '${dir.replace(/'/g, "''")}' AND lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%')`,
-                    format: 'JSONEachRow'
-                };
-         
-                console.log(updateQuery)
-                try{
-                    await queryChWithRetry(updateQuery);
-                }
-                catch(e){
-                    console.log(e)
-                }
-            }
+        // Agregamos un valor aleatorio para simular el m2
+        for (let i = 0; i < direccionesDB.length; i++) {
+            const m2 = generateRandomNumber(45_000, 450_000, 10_000);
+            const direccion = direccionesDB[i].direccion;
+            const updateQuery = {
+                query: `ALTER TABLE padron.persona UPDATE m2 = ${m2} WHERE TX_DOMICILIO = '${direccion}'`,
+                format: 'JSONEachRow',
+            };
+            await queryCh(updateQuery);
         }
+
 
         offset += limit; // Incrementa el offset para la siguiente iteración
     }
@@ -121,6 +105,18 @@ async function normalizarUnLoteDirecciones(direcciones) {
         // Extrae el resultado normalizado de la respuesta
         return response.data.resultados;
 
+}
+
+
+function generateRandomNumber(start, end, step) {
+    // Calcular cuántos pasos hay entre el inicio y el final
+    const numSteps = (end - start) / step;
+
+    // Generar un índice aleatorio entre 0 y numSteps
+    const randomStep = Math.floor(Math.random() * (numSteps + 1));
+
+    // Calcular el número final sumando el número de pasos al inicio
+    return start + randomStep * step;
 }
 
 obtenerDomicilios();
