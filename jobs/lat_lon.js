@@ -1,5 +1,5 @@
 const axios = require('axios');
-const queryCh= require('../database.js');
+const { queryCh, clickhouse } = require('../database.js');
 const fs = require('fs');
 const path = require('path');
 

@@ -1,4 +1,4 @@
-const queryCh = require('../database.js');
+const { queryCh, clickhouse } = require('../database.js');
 const axios = require('axios');
 const mapa = require('../mapa.js');
 

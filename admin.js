@@ -1,6 +1,16 @@
 var myApp = angular.module('myApp', ['ng-admin']);
-myApp.config(['NgAdminConfigurationProvider', function (nga) {
+
+
+myApp.config(['$stateProvider','NgAdminConfigurationProvider', function ($stateProvider,nga) {
     // create an admin application
+
+
+    $stateProvider.state('geo', {
+        parent: 'ng-admin',  // Esto es crucial para mantener el layout de ng-admin
+        url: '/geo',
+        controller: 'GeoController',
+        templateUrl: 'geo.html'
+    });
 
     var API = ''
     // If the URL is localhost then use loclhost API
@@ -178,8 +188,140 @@ myApp.config(['NgAdminConfigurationProvider', function (nga) {
     
 
     admin.addEntity(resultados);
+
+
+    // ###################### inmuebles ###############################
+
+    var inmuebles = nga.entity('inmuebles').identifier(nga.field('link'));
+
+    inmuebles.listView()
+    .title('Inmuebles San Fernando')
+    .perPage(30)
+    .fields([
+ 
+        nga.field('link', 'string').label('Link'),
+        nga.field('lat', 'string').label('Latitud'),
+        nga.field('lon', 'string').label('Longitud'),
+        nga.field('superficieTotal', 'number').label('Superficie Total'),
+        nga.field('superficieCubierta', 'number').label('Superficie Cubierta'),
+        nga.field('precio', 'number').label('Precio'),
+        nga.field('precioMetroCuadradoTotal', 'number').label('Precio por Metro Cuadrado Total'),
+        nga.field('precioMetroCuadradoCubierto', 'number').label('Precio por Metro Cuadrado Cubierto'),
+        nga.field('ambientes', 'number').label('Ambientes'),
+        nga.field('dormitorios', 'number').label('Dormitorios'),
+        nga.field('banos', 'number').label('Baños'),
+        nga.field('cocheras', 'number').label('Cocheras'),
+        nga.field('bauleras', 'number').label('Bauleras'),
+        nga.field('cantidadDePisos', 'number').label('Cantidad de Pisos'),
+        nga.field('tipoDeCasa', 'string').label('Tipo de Casa'),
+        nga.field('orientacion', 'string').label('Orientación'),
+        nga.field('antiguedad', 'number').label('Antigüedad'),
+        nga.field('expensas', 'number').label('Expensas'),
+        nga.field('seguridad', 'string').label('Seguridad'),
+        nga.field('portonAutomatico', 'string').label('Portón Automático'),
+        nga.field('conBarrioCerrado', 'string').label('Con Barrio Cerrado'),
+        nga.field('accesoControlado', 'string').label('Acceso Controlado'),
+        nga.field('parrilla', 'string').label('Parrilla'),
+        nga.field('pileta', 'string').label('Pileta'),
+        nga.field('placards', 'string').label('Placards'),
+        nga.field('toilette', 'string').label('Toilette'),
+        nga.field('terraza', 'string').label('Terraza'),
+        nga.field('comedor', 'string').label('Comedor'),
+        nga.field('vestidor', 'string').label('Vestidor'),
+        nga.field('estudio', 'string').label('Estudio'),
+        nga.field('living', 'string').label('Living'),
+        nga.field('patio', 'string').label('Patio'),
+        nga.field('dormitorioEnSuite', 'string').label('Dormitorio en Suite'),
+        nga.field('balcon', 'string').label('Balcón'),
+        nga.field('altillo', 'string').label('Altillo'),
+        nga.field('jardin', 'string').label('Jardín'),
+        nga.field('cocina', 'string').label('Cocina'),
+        nga.field('dependenciaDeServicio', 'string').label('Dependencia de Servicio'),
+        nga.field('playroom', 'string').label('Playroom'),
+        nga.field('conLavadero', 'string').label('Con Lavadero'),
+        nga.field('desayunador', 'string').label('Desayunador'),
+        nga.field('accesoAInternet', 'string').label('Acceso a Internet'),
+        nga.field('aireAcondicionado', 'string').label('Aire Acondicionado'),
+        nga.field('calefaccion', 'string').label('Calefacción'),
+        nga.field('tvPorCable', 'string').label('TV por Cable'),
+        nga.field('lineaTelefonica', 'string').label('Línea Telefónica'),
+        nga.field('gasNatural', 'string').label('Gas Natural'),
+        nga.field('grupoElectrogeno', 'string').label('Grupo Electrógeno'),
+        nga.field('conEnergiaSolar', 'string').label('Con Energía Solar'),
+        nga.field('conConexionParaLavarropas', 'string').label('Conexión para Lavarropas'),
+        nga.field('aguaCorriente', 'string').label('Agua Corriente'),
+        nga.field('cisterna', 'string').label('Cisterna'),
+        nga.field('caldera', 'string').label('Caldera'),
+        nga.field('chimenea', 'string').label('Chimenea'),
+        nga.field('gimnasio', 'string').label('Gimnasio'),
+        nga.field('jacuzzi', 'string').label('Jacuzzi'),
+        nga.field('estacionamientoParaVisitantes', 'string').label('Estacionamiento para Visitantes')
+
+
+    ]).filters([
+        nga.field('precio', 'number')
+        .label('Precio')
+        .pinned(true),
     
-    // attach the admin application to the DOM and execute it
+    nga.field('superficieTotal', 'number')
+        .label('Superficie Total')
+        .pinned(true),
+    
+    nga.field('dormitorios', 'number')
+        .label('Dormitorios')
+        .pinned(true),
+    
+    nga.field('banos', 'number')
+        .label('Baños')
+        .pinned(true),
+    
+    nga.field('cocheras', 'number')
+        .label('Cocheras')
+        .pinned(true),
+    
+    nga.field('tipoDeCasa', 'string')
+        .label('Tipo de Casa')
+        .pinned(true),
+    
+    nga.field('antiguedad', 'number')
+        .label('Antigüedad')
+        .pinned(true),
+    
+    nga.field('seguridad', 'boolean')
+        .label('Seguridad')
+        .pinned(true),
+    
+    nga.field('piscina', 'boolean')  // Asumiendo que quisiste decir 'pileta' como 'piscina'
+        .label('Piscina')
+        .pinned(true),
+    
+    nga.field('accesoControlado', 'boolean')
+        .label('Acceso Controlado')
+        .pinned(true)
+
+    ])
+
+    .sortField('precioMetroCuadradoTotal')
+    .sortDir('ASC')
+
+    
+
+    admin.addEntity(inmuebles);
+    
+
+    admin.menu(
+        nga.menu()
+        .addChild(nga.menu()
+            .title('Geo')  // El título que aparecerá en el menú
+            .link('/geo')  // Usa el mismo URL definido en el estado
+            .icon('<span class="glyphicon glyphicon-world"></span>') // Icono personalizado (opcional)
+        )
+        
+        .addChild(nga.menu(persona))
+        .addChild(nga.menu(resultados))
+        .addChild(nga.menu(inmuebles))
+    );
+    // attach the admin application to the DOM and execute i
     nga.configure(admin);
 }]);
 
@@ -229,3 +371,269 @@ myApp.config(['RestangularProvider', function (RestangularProvider) {
         return { params: params };
     });
 }]);
+
+
+myApp.controller('GeoController', ['$scope', '$http', function($scope, $http) {
+    $scope.data = [];
+
+    var API = '';
+    // If the URL is localhost then use localhost API
+    if (window.location.hostname === 'localhost') {
+        API = 'http://localhost:3000/';
+    }
+
+    $scope.loadData = function() {
+        $http.get(`${API}geo`).then(function(response) {
+            $scope.data = response.data;
+            $scope.mostrarMapa(); // Ensure to call it as a scope function
+        }, function(error) {
+            console.error('Error fetching data:', error);
+        });
+    };
+
+    $scope.mostrarMapa = function() {
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: ol.proj.fromLonLat([-58.54692979910881, -34.445240420040676]),
+                zoom: 12
+            })
+        });
+
+
+        const normalizedm2 = $scope.normalizeArrayValue($scope.data.map(item => item.precioMetroCuadradoCubierto));
+
+    
+        // Capa de mapa de calor para m2
+        var heatMapLayerM2 = new ol.layer.Heatmap({
+            source: new ol.source.Vector({
+                features: $scope.data.map((item,index) => new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([item.lon, item.lat])),
+                    weight: item.precioMetroCuadradoCubierto
+                }))
+            }),
+            blur: 40,
+            radius: 5,
+            gradient: ['#00f', '#0ff', '#0f0', '#ff0', '#f00']
+        });
+
+
+
+
+        // Capa de mapa de calor para m2 total
+        var heatMapLayerM2Total = new ol.layer.Heatmap({
+            source: new ol.source.Vector({
+                features: $scope.data.map((item,index) => new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([item.lon, item.lat])),
+                    weight: item.precioMetroCuadradoTotal
+                }))
+            }),
+            blur: 40,
+            radius: 5,
+            gradient: ['#00f', '#0ff', '#0f0', '#ff0', '#f00']
+        });
+
+
+        
+        var seguridad = new ol.layer.Heatmap({
+            source: new ol.source.Vector({
+                features: $scope.data.map((item,index) => new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([item.lon, item.lat])),
+                    weight: (item.seguridad == 'Sí'? 1 : 0)
+                }))
+            }),
+            blur: 40,
+            radius: 5,
+            gradient: ['#00f', '#0ff', '#0f0', '#ff0', '#f00']
+        });
+
+        var pileta = new ol.layer.Heatmap({
+            source: new ol.source.Vector({
+                features: $scope.data.map((item,index) => new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([item.lon, item.lat])),
+                    weight: (item.pileta == 'Sí'? 1 : 0)
+                }))
+            }),
+            blur: 40,
+            radius: 5,
+            gradient: ['#00f', '#0ff', '#0f0', '#ff0', '#f00']
+        });
+
+
+
+        // Todos juntos
+
+
+        map.addLayer(heatMapLayerM2);
+        map.addLayer(heatMapLayerM2Total);
+        map.addLayer(seguridad);
+        map.addLayer(pileta);
+
+
+ 
+     
+        heatMapLayerM2.setVisible(false); // Start with m2 layer invisible
+        heatMapLayerM2Total.setVisible(false); // Start with m2 total layer invisible
+        seguridad.setVisible(false); // Start with ambientes layer invisible
+        pileta.setVisible(false); // Start with ambientes layer invisible
+
+        $scope.map = map;
+        $scope.heatMapLayerM2 = heatMapLayerM2;
+        $scope.heatMapLayerM2Total = heatMapLayerM2Total;
+        $scope.seguridad = seguridad;
+        $scope.pileta = pileta;
+
+        
+    };
+
+   
+
+
+    $scope.normalizeArrayValue = function(numbers) {
+        if (!numbers.length) return []; // Retorna un array vacío si no hay elementos
+    
+        const max = Math.max(...numbers);
+        const min = Math.min(...numbers);
+    
+        // Si max y min son iguales, todos los elementos son iguales, devuelve array de unos.
+        if (max === min) return numbers.map(() => 1);
+    
+        return numbers.map(num => (num - min) / (max - min));
+    }
+
+    // Función para alternar la visibilidad de las capas
+    $scope.toggleLayer = function(layerName) {
+        $scope[layerName].setVisible(!$scope[layerName].getVisible());
+    };
+    
+
+
+    $scope.loadData();
+}]);
+
+
+
+myApp.controller('GeoController2', ['$scope', '$http', function($scope, $http) {
+
+
+    const normalizedlla2023 = $scope.normalizeArrayPolitica($scope.data.map(item => item.lla_2023));
+
+    // Capa de mapa de calor para lla_2023
+    var heatMapLayerLla2023 = new ol.layer.Heatmap({
+        source: new ol.source.Vector({
+            features: $scope.data.map((item,index) => new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([item.lon, item.lat])),
+                weight: normalizedlla2023[index]
+            }))
+        }),
+        blur: 40,
+        radius: 5,
+        opacity: 0.5,
+        gradient: ['rgba(0,0,0,0)','#ff00ff']
+    });
+
+    const normalizedjpec2023 = $scope.normalizeArrayPolitica($scope.data.map(item => item.jpec_2023));
+
+    // Capa de mapa de calor para lla_2023
+    var heatMapLayerJpec2023= new ol.layer.Heatmap({
+        source: new ol.source.Vector({
+            features: $scope.data.map((item,index) => new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([item.lon, item.lat])),
+                weight: normalizedjpec2023[index]
+            }))
+        }),
+        blur: 40,
+        radius: 5,
+        opacity: 0.5,
+        gradient: ['rgba(0,0,0,0)','#ffff00']
+    });
+
+    const normalizeduplp2023 = $scope.normalizeArrayPolitica($scope.data.map(item => item.uplp_2023));
+
+    // Capa de mapa de calor para lla_2023
+    var heatMapLayeruplp2023= new ol.layer.Heatmap({
+        source: new ol.source.Vector({
+            features: $scope.data.map((item,index) => new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([item.lon, item.lat])),
+                weight: normalizeduplp2023[index]
+            }))
+        }),
+        blur: 40,
+        radius: 5,
+        opacity: 0.5,
+        gradient: ['rgba(0,0,0,0)','#0000ff']
+    });
+
+    const normalizedfit2023 = $scope.normalizeArrayPolitica($scope.data.map(item => item.fdiydt_2023));
+
+
+    console.log("Normalizados m2",normalizedfit2023)
+    console.log("Data fit",$scope.data.map(item => item.fdiydt_2023));
+
+    // Capa de mapa de calor para lla_2023
+    var heatMapLayerfit2023= new ol.layer.Heatmap({
+        source: new ol.source.Vector({
+            features: $scope.data.map((item,index) => new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([item.lon, item.lat])),
+                weight: normalizedfit2023[index]
+            }))
+        }),
+        blur: 40,
+        radius: 5,
+        opacity: 0.5,
+        gradient: ['rgba(0,0,0,0)','#ff0000']
+    });
+
+    map.addLayer(heatMapLayerLla2023);
+    map.addLayer(heatMapLayerJpec2023);
+    map.addLayer(heatMapLayeruplp2023);
+    map.addLayer(heatMapLayerfit2023);
+
+    heatMapLayerLla2023.setVisible(false); // Start with lla_2023 layer invisible
+    heatMapLayerJpec2023.setVisible(false); // Start with jpec_2023 layer invisible
+    heatMapLayeruplp2023.setVisible(false); // Start with uplp_2023 layer invisible
+    heatMapLayerfit2023.setVisible(false); // Start with fit_2023 layer invisible
+
+    $scope.heatMapLayerLla2023 = heatMapLayerLla2023;
+    $scope.heatMapLayerJpec2023 = heatMapLayerJpec2023;
+    $scope.heatMapLayeruplp2023 = heatMapLayeruplp2023;
+    $scope.heatMapLayerfit2023 = heatMapLayerfit2023;
+
+
+     // Función para alternar la visibilidad de las capas
+     $scope.toggleLayer = function(layerName) {
+        if (layerName === 'm2') {
+            $scope.heatMapLayerM2.setVisible(!$scope.heatMapLayerM2.getVisible());
+        } else if (layerName === 'lla_2023') {
+            $scope.heatMapLayerLla2023.setVisible(!$scope.heatMapLayerLla2023.getVisible());
+        }
+        else if (layerName === 'jpec_2023') {
+            $scope.heatMapLayerJpec2023.setVisible(!$scope.heatMapLayerJpec2023.getVisible());
+        }
+        else if (layerName === 'uplp_2023') {
+            $scope.heatMapLayeruplp2023.setVisible(!$scope.heatMapLayeruplp2023.getVisible());
+        }
+        else if (layerName === 'fit_2023') {
+            $scope.heatMapLayerfit2023.setVisible(!$scope.heatMapLayerfit2023.getVisible());
+        }
+    };
+
+
+    $scope.normalizeArrayPolitica = function(numbers) {
+        if (!numbers.length) return []; // Retorna un array vacío si no hay elementos
+    
+        const max = 100
+        const min = 0
+    
+        // Si max y min son iguales, todos los elementos son iguales, devuelve array de unos.
+        if (max === min) return numbers.map(() => 1);
+    
+        return numbers.map(num => (num - min) / (max - min));
+    }
+
+}])

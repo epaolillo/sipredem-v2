@@ -33,4 +33,4 @@ async function queryCh(query) {
 }
 
 
-module.exports = queryCh;
+module.exports = { queryCh, clickhouse };

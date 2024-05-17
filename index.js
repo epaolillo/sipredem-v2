@@ -11,13 +11,16 @@ const fs = require('fs');
 const path = require('path');
 
 const personas = require('./models/personas.js');
+const inmuebles = require('./models/inmuebles.js');
+const { geo } = require('./models/geo.js');
 const { resultados_2023 } = require('./models/resultados_2023.js');
 require('dotenv').config();
+const compression = require('compression');
 
 const cookieParser = require('cookie-parser');
 
 app.use(cookieParser());
-
+app.use(compression());
 
 
 const jobs = require('./jobs/jobs.js');
@@ -92,11 +95,17 @@ app.get('/personas', async (req, res) => {
     return personas(req, res);
 });
 
+app.get('/inmuebles', async (req, res) => {
+    return inmuebles(req, res);
+});
 
 app.get('/resultados_2023', async (req, res) => {
     return resultados_2023(req, res);
 });
 
+app.get('/geo', (req, res) => {
+    return inmuebles(req, res);
+});
 
 // Servir archivos estáticos desde el directorio raíz
 app.use(express.static(path.join(__dirname)));

@@ -1,7 +1,9 @@
-
 const { queryCh, clickhouse } = require('../database.js');
+const ENTITY = 'inmuebles'
+const KEY = 'link'
 
-async function personas(req, res) {
+
+async function entity(req, res) {
     /* custom_query */
     try {
         // Parámetros de paginación
@@ -9,9 +11,9 @@ async function personas(req, res) {
         const offset = parseInt(req.query._offset) || 0;
 
         // Parámetros de ordenación
-        let sortField = req.query._sort || 'NU_MATRICULA';
+        let sortField = req.query._sort || KEY;
         if(sortField = 'id'){
-            sortField = 'NU_MATRICULA';
+            sortField = KEY;
         }
         const sortOrder = req.query._order === 'DESC' ? 'DESC' : 'ASC';
 
@@ -27,15 +29,15 @@ async function personas(req, res) {
             };
 
      
-            const personas = await queryCh(query);
+            const ENTITY = await queryCh(query);
 
-            const total = personas.length
+            const total = ENTITY.length
 
             // Establece los encabezados necesarios para la paginación en ng-admin
             res.set('X-Total-Count', total);
             res.set('Access-Control-Expose-Headers', 'X-Total-Count');
 
-            res.json(personas);
+            res.json(ENTITY);
             return;
     
         }
@@ -55,31 +57,31 @@ async function personas(req, res) {
         const whereClause = filters ? `WHERE ${filters}` : '';
 
         const query = {
-            query: `SELECT * FROM persona ${whereClause} ORDER BY ${sortField} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`,
+            query: `SELECT * FROM ${ENTITY} ${whereClause} ORDER BY ${sortField} ${sortOrder} LIMIT ${limit} OFFSET ${offset}`,
             format: 'JSONEachRow',
         };
 
         const query_total = {
-            query: `SELECT count(*) as total FROM persona ${whereClause}`,
+            query: `SELECT count(*) as total FROM ${ENTITY} ${whereClause}`,
             format: 'JSONEachRow',
         };
 
-        // Ejecuta la consulta para obtener las personas
-        const personas = await queryCh(query);
-        const total_personas = await queryCh(query_total);
+        // Ejecuta la consulta para obtener las ENTITY
+        const ENTITY_RESULT = await queryCh(query);
+        const total_ENTITY = await queryCh(query_total);
 
         // Ejecuta la consulta para obtener el total de registros (considerando los filtros)
-        const total = total_personas[0]['total'];
+        const total = total_ENTITY[0]['total'];
 
         // Establece los encabezados necesarios para la paginación en ng-admin
         res.set('X-Total-Count', total);
         res.set('Access-Control-Expose-Headers', 'X-Total-Count');
 
-        res.json(personas);
+        res.json(ENTITY_RESULT);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error interno del servidor');
     }
 }
 
-module.exports = personas;
+module.exports = entity;
