@@ -12,7 +12,9 @@ require('dotenv').config();
 
 
 (async () => {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
 
     // Reset query values
@@ -110,7 +112,9 @@ require('dotenv').config();
             salonDeFiestas Nullable(String),
             sauna Nullable(String),
             heladera Nullable(String),
-            amoblado Nullable(String)
+            amoblado Nullable(String),
+            usuario Nullable(String),
+            moneda Nullable(String)
         ) ENGINE = MergeTree()
         ORDER BY link;
         `,
@@ -215,7 +219,14 @@ async function insertInmueble(inmuebleData) {
             values: inmuebleData,
             format: 'JSONEachRow',
             // `id` column value for this row will be zero (default for UInt32)
-            columns: ['link', 'lat', 'lon', 'superficieTotal', 'superficieCubierta', 'precio', 'precioMetroCuadradoTotal', 'precioMetroCuadradoCubierto', 'ambientes', 'dormitorios', 'banos', 'cocheras', 'bauleras', 'cantidadDePisos', 'tipoDeCasa', 'orientacion', 'antiguedad', 'expensas', 'seguridad', 'portonAutomatico', 'conBarrioCerrado', 'accesoControlado', 'parrilla', 'pileta', 'placards', 'toilette', 'terraza', 'comedor', 'vestidor', 'estudio', 'living', 'patio', 'dormitorioEnSuite', 'balcon', 'altillo', 'jardin', 'cocina', 'dependenciaDeServicio', 'playroom', 'conLavadero', 'desayunador', 'accesoAInternet', 'aireAcondicionado', 'calefaccion', 'tvPorCable', 'lineaTelefonica', 'gasNatural', 'grupoElectrogeno', 'conEnergiaSolar', 'conConexionParaLavarropas', 'aguaCorriente', 'cisterna', 'caldera', 'chimenea', 'gimnasio', 'jacuzzi', 'estacionamientoParaVisitantes', 'areaDeCine', 'areaDeJuegosInfantiles', 'conAreaVerde', 'ascensor', 'canchaDeBasquetbol', 'conCanchaDeFutbol', 'canchaDePaddle', 'canchaDeTenis', 'conCanchaPolideportiva', 'salonDeFiestas', 'sauna', 'heladera', 'amoblado']
+            columns: ['link', 'lat', 'lon', 'superficieTotal', 'superficieCubierta', 'precio', 'precioMetroCuadradoTotal', 'precioMetroCuadradoCubierto', 'ambientes', 'dormitorios', 'banos', 'cocheras', 'bauleras', 'cantidadDePisos', 'tipoDeCasa', 'orientacion', 'antiguedad', 'expensas', 'seguridad', 'portonAutomatico', 'conBarrioCerrado', 'accesoControlado', 'parrilla',
+             'pileta', 'placards', 'toilette', 'terraza', 'comedor', 'vestidor', 'estudio', 'living', 'patio',
+              'dormitorioEnSuite', 'balcon', 'altillo', 'jardin', 'cocina', 'dependenciaDeServicio', 'playroom',
+               'conLavadero', 'desayunador', 'accesoAInternet', 'aireAcondicionado', 'calefaccion', 'tvPorCable',
+                'lineaTelefonica', 'gasNatural', 'grupoElectrogeno', 'conEnergiaSolar', 'conConexionParaLavarropas',
+                 'aguaCorriente', 'cisterna', 'caldera', 'chimenea', 'gimnasio', 'jacuzzi', 'estacionamientoParaVisitantes',
+                  'areaDeCine', 'areaDeJuegosInfantiles', 'conAreaVerde', 'ascensor', 'canchaDeBasquetbol', 'conCanchaDeFutbol',
+                   'canchaDePaddle', 'canchaDeTenis', 'conCanchaPolideportiva', 'salonDeFiestas', 'sauna', 'heladera', 'amoblado', 'usuario','moneda']
           })
 
     }
@@ -378,9 +389,18 @@ async function scrapeData(page) {
         const heladera = tableData.find(row => row.header === 'Heladera')?.value || null;
         const amoblado = tableData.find(row => row.header === 'Amoblado')?.value || null;
 
+        // ui-vip-profile-info__info-link h3
+        const usuario = await page.$$eval('.ui-vip-profile-info__info-link h3', rows => 
+            rows.map(row => row.textContent.replace('.', ''))?.[0]
+        );
+
 
         let precio = await page.$$eval('[itemprop="price"]', rows => 
             rows.map(row => row.getAttribute("content").replace('.',''))?.[0]
+        );
+
+        let moneda = await page.$$eval('.andes-money-amount .andes-money-amount__currency-symbol', rows =>
+            rows.map(row => row.textContent)?.[0]
         );
 
         
@@ -389,81 +409,85 @@ async function scrapeData(page) {
     
         let coordenadas = extractLatLngFromUrl(imageSrc);
 
-            results.push({ link,
-                lat: coordenadas.latitude,
-                lon: coordenadas.longitude,
-                superficieTotal,
-                superficieCubierta,
-                precio,
-                precioMetroCuadradoTotal,
-                precioMetroCuadradoCubierto,
-                ambientes,
-                dormitorios,
-                banos,
-                cocheras,
-                bauleras,
-                cantidadDePisos,
-                tipoDeCasa,
-                orientacion,
-                antiguedad,
-                expensas,
-                seguridad,
-                portonAutomatico,
-                conBarrioCerrado,
-                accesoControlado,
-                parrilla,
-                pileta,
-                placards,
-                toilette,
-                terraza,
-                comedor,
-                vestidor,
-                estudio,
-                living,
-                patio,
-                dormitorioEnSuite,
-                balcon,
-                altillo,
-                jardin,
-                cocina,
-                dependenciaDeServicio,
-                playroom,
-                conLavadero,
-                desayunador,
-                accesoAInternet,
-                aireAcondicionado,
-                calefaccion,
-                tvPorCable,
-                lineaTelefonica,
-                gasNatural,
-                grupoElectrogeno,
-                conEnergiaSolar,
-                conConexionParaLavarropas,
-                aguaCorriente,
-                cisterna,
-                caldera,
-                chimenea,
-                gimnasio,
-                jacuzzi,
-                estacionamientoParaVisitantes,
-                areaDeCine,
-                areaDeJuegosInfantiles,
-                conAreaVerde,
-                ascensor,
-                canchaDeBasquetbol,
-                conCanchaDeFutbol,
-                canchaDePaddle,
-                canchaDeTenis,
-                conCanchaPolideportiva,
-                salonDeFiestas,
-                sauna,
-                heladera,
-                amoblado
-            });
+        let object = { link,
+            lat: coordenadas.latitude,
+            lon: coordenadas.longitude,
+            superficieTotal,
+            superficieCubierta,
+            precio,
+            precioMetroCuadradoTotal,
+            precioMetroCuadradoCubierto,
+            ambientes,
+            dormitorios,
+            banos,
+            cocheras,
+            bauleras,
+            cantidadDePisos,
+            tipoDeCasa,
+            orientacion,
+            antiguedad,
+            expensas,
+            seguridad,
+            portonAutomatico,
+            conBarrioCerrado,
+            accesoControlado,
+            parrilla,
+            pileta,
+            placards,
+            toilette,
+            terraza,
+            comedor,
+            vestidor,
+            estudio,
+            living,
+            patio,
+            dormitorioEnSuite,
+            balcon,
+            altillo,
+            jardin,
+            cocina,
+            dependenciaDeServicio,
+            playroom,
+            conLavadero,
+            desayunador,
+            accesoAInternet,
+            aireAcondicionado,
+            calefaccion,
+            tvPorCable,
+            lineaTelefonica,
+            gasNatural,
+            grupoElectrogeno,
+            conEnergiaSolar,
+            conConexionParaLavarropas,
+            aguaCorriente,
+            cisterna,
+            caldera,
+            chimenea,
+            gimnasio,
+            jacuzzi,
+            estacionamientoParaVisitantes,
+            areaDeCine,
+            areaDeJuegosInfantiles,
+            conAreaVerde,
+            ascensor,
+            canchaDeBasquetbol,
+            conCanchaDeFutbol,
+            canchaDePaddle,
+            canchaDeTenis,
+            conCanchaPolideportiva,
+            salonDeFiestas,
+            sauna,
+            heladera,
+            amoblado,
+            usuario,
+            moneda
+        };
+            results.push(object);
 
+            console.log("PUTOS RESULTADOS",object)
+            console.log("Usuario:",usuario)
     }
 
-    console.log("PUTOS RESULTADOS",results)
   
     return results;
 }
