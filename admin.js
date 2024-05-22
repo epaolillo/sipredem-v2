@@ -255,6 +255,8 @@ myApp.config(['$stateProvider','NgAdminConfigurationProvider', function ($stateP
         nga.field('chimenea', 'string').label('Chimenea'),
         nga.field('gimnasio', 'string').label('Gimnasio'),
         nga.field('jacuzzi', 'string').label('Jacuzzi'),
+        nga.field('usuario', 'string').label('Usuario'),
+        nga.field('moneda', 'string').label('Moneda'),
         nga.field('estacionamientoParaVisitantes', 'string').label('Estacionamiento para Visitantes')
 
 
