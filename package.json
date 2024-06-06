@@ -12,8 +12,10 @@
     "@clickhouse/client": "^1.0.1",
     "axios": "^1.6.8",
     "body-parser": "^1.20.2",
+    "cheerio": "^1.0.0-rc.12",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
+    "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "http": "^0.0.1-security",
@@ -21,6 +23,7 @@
     "iconv-lite": "^0.6.3",
     "mysql2": "^3.9.4",
     "ng-admin": "^1.0.13",
+    "node-html-parser": "^6.1.13",
     "path": "^0.12.7",
     "puppeteer": "^22.7.1",
     "sqlite3": "^5.1.7"

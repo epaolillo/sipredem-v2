@@ -4,15 +4,25 @@ const { queryCh, clickhouse } = require('../database.js');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
-
+const { parse } = require('node-html-parser');
 
 
 // Listados de items que el scrapper debe reconocer como puntos para er navegados
 
+async function obtenerCUILES() {
+    const query =  {
+        query: `SELECT DISTINCT NU_MATRICULA, TX_GENERO FROM persona WHERE lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%') AND NU_MATRICULA >= 16000000`,
+        format: 'JSONEachRow',
+    };
 
+    const resultados = await queryCh(query);
+    return resultados
+}
 
 (async () => {
     const browser = await puppeteer.launch({
+        // healdess false
+        headless: false,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
@@ -26,103 +36,7 @@ require('dotenv').config();
     //await queryChWithRetry(resetQuery);
 
     const puntosDeNavegacion = ['Mostrar todas las ofertas'];
-    const regionesDeInteres = ['https://inmuebles.mercadolibre.com.ar/venta/bsas-gba-norte/san-fernando/#unapplied_filter_id%3DITEM_CONDITION%26unapplied_filter_name%3DCondici%C3%B3n%26unapplied_value_id%3D2230581%26unapplied_value_name%3DUsado%26unapplied_autoselect%3Dfalsehttps://inmuebles.mercadolibre.com.ar/venta/bsas-gba-norte/san-fernando/_PriceRange_40000USD-800000USD_NoIndex_True#applied_filter_id%3Dprice%26applied_filter_name%3DPrecio%26applied_filter_order%3D7%26applied_value_id%3D40000-800000%26applied_value_name%3DUSD40000-USD800000%26applied_value_order%3D4%26applied_value_results%3DUNKNOWN_RESULTS%26is_custom%3Dtrue']
-
-
-
-    // Creamos tabla de inmuebles
-    const dropTableInkuebles = {
-        query:`
-        DROP TABLE IF EXISTS padron.inmuebles
-        `,
-        format: 'JSONEachRow'
-    };
-
-    await queryCh(dropTableInkuebles);
-
-    const createTable = {
-        query:`
-        CREATE TABLE IF NOT EXISTS padron.inmuebles (
-            link String,
-            lat Nullable(Float64),
-            lon Nullable(Float64),
-            superficieTotal Nullable(UInt32),
-            superficieCubierta Nullable(UInt32),
-            precio Nullable(UInt64),
-            precioMetroCuadradoTotal Nullable(Float64),
-            precioMetroCuadradoCubierto Nullable(Float64),
-            ambientes Nullable(UInt8),
-            dormitorios Nullable(UInt8),
-            banos Nullable(UInt8),
-            cocheras Nullable(UInt8),
-            bauleras Nullable(UInt8),
-            cantidadDePisos Nullable(UInt8),
-            tipoDeCasa Nullable(String),
-            orientacion Nullable(String),
-            antiguedad Nullable(UInt8),
-            expensas Nullable(UInt64),
-            seguridad Nullable(String),
-            portonAutomatico Nullable(String),
-            conBarrioCerrado Nullable(String),
-            accesoControlado Nullable(String),
-            parrilla Nullable(String),
-            pileta Nullable(String),
-            placards Nullable(String),
-            toilette Nullable(String),
-            terraza Nullable(String),
-            comedor Nullable(String),
-            vestidor Nullable(String),
-            estudio Nullable(String),
-            living Nullable(String),
-            patio Nullable(String),
-            dormitorioEnSuite Nullable(String),
-            balcon Nullable(String),
-            altillo Nullable(String),
-            jardin Nullable(String),
-            cocina Nullable(String),
-            dependenciaDeServicio Nullable(String),
-            playroom Nullable(String),
-            conLavadero Nullable(String),
-            desayunador Nullable(String),
-            accesoAInternet Nullable(String),
-            aireAcondicionado Nullable(String),
-            calefaccion Nullable(String),
-            tvPorCable Nullable(String),
-            lineaTelefonica Nullable(String),
-            gasNatural Nullable(String),
-            grupoElectrogeno Nullable(String),
-            conEnergiaSolar Nullable(String),
-            conConexionParaLavarropas Nullable(String),
-            aguaCorriente Nullable(String),
-            cisterna Nullable(String),
-            caldera Nullable(String),
-            chimenea Nullable(String),
-            gimnasio Nullable(String),
-            jacuzzi Nullable(String),
-            estacionamientoParaVisitantes Nullable(String),
-            areaDeCine Nullable(String),
-            areaDeJuegosInfantiles Nullable(String),
-            conAreaVerde Nullable(String),
-            ascensor Nullable(String),
-            canchaDeBasquetbol Nullable(String),
-            conCanchaDeFutbol Nullable(String),
-            canchaDePaddle Nullable(String),
-            canchaDeTenis Nullable(String),
-            conCanchaPolideportiva Nullable(String),
-            salonDeFiestas Nullable(String),
-            sauna Nullable(String),
-            heladera Nullable(String),
-            amoblado Nullable(String),
-            usuario Nullable(String),
-            moneda Nullable(String),
-            created DateTime DEFAULT now()
-        ) ENGINE = MergeTree()
-        ORDER BY link;
-        `,
-        format: 'JSONEachRow'
-    };
-
-    await queryCh(createTable);
+    const regionesDeInteres = ['https://servicioswww.anses.gob.ar/ooss2/ConsultaDoc.aspx']
 
 
     /*
@@ -151,48 +65,63 @@ require('dotenv').config();
     for (let region of regionesDeInteres) {
         console.log(`Navegando a ${region}`);
         await page.goto(region);
-        await waitContent(page);
+        // await waitContent(page);
 
-            while(true && EXISTS_NEXT && CURRENT_PAGE < MAX_PAGES ){
+
+        let cuiles = await obtenerCUILES();
+       
+        cuiles = cuiles.map(cuil => calcularCuit(cuil.NU_MATRICULA, cuil.TX_GENERO == 'M' ? 20 : 27));
+
+        for(const cuil of cuiles){
+            // completando cuit 20345553062 en elemento con name ctl00$ContentPlaceHolder1$txtDoc
+
+            //await page.type('input[name="ctl00$ContentPlaceHolder1$txtDoc"]', cuil);
+            await typeWithRandomDelay(page, 'input[name="ctl00$ContentPlaceHolder1$txtDoc"]', cuil);
+    
+            // Click en continuar elemento name ctl00$ContentPlaceHolder1$Button1
+            await page.click('input[name="ctl00$ContentPlaceHolder1$Button1"]');
+
+            try{
+                // if ContentPlaceHolder1_MessageLabel is text = El CUIL ingresado no es válido. entonces volvemos atras y ponemos siguiente cuil
+                await waitForEitherSelector(page, '#ContentPlaceHolder1_MessageLabel', '#tblCabecera', 3000);
                 
                 try{
-                    // get page url from page
-                    let url = await page.evaluate(() => window.location.href);
-                    console.log(`Scrapping sobre la URL ${url} en la pagina ${CURRENT_PAGE}`);
-                    const productos = await scrapeData(page);
-
-
-                    productos.forEach( async (producto) => {                       
-                        await insertInmueble(producto);
-                    })
-
-                    console.log(`Se relevaron ${productos.length} productos por un total de m2 de ${productos.reduce((acc, producto) => acc + producto.superficieTotal, 0)}`);
-
-                    // Vuelvo a la pagina landing
-                    await page.goto(region);
-                    await waitContent(page);
-                
-                    // Solo es posible avanzar una pagina mas si existe, sino el EXISTS_NEXT se pone en false
-                    if((await existsNextPage(page, CURRENT_PAGE)) == true){
-                        CURRENT_PAGE++;
-                        console.log(`Click en la pagina ${CURRENT_PAGE}`)
-                        await clickElementPageN(page, CURRENT_PAGE);
-                        await waitContent(page);
-                        region = await page.evaluate(() => window.location.href);
+                    const message2 = await page.$eval('#ContentPlaceHolder1_MessageLabel', el => el.innerText);
+        
+                    if(message2){
+                        await sleep(2000);
+                        await page.goto(region);
+                        continue;
                     }
-                    else{
-                        console.log(`No existe mas paginas para la URL ${url}`);
-                        EXISTS_NEXT = false;
-                    }
-
-
                 }
                 catch(e){
-                    console.log(e);
+
                 }
+
+                try{
+                    await sleep(1000);
+                    const cuil_final = await page.$eval('#ContentPlaceHolder1_lblCuil', el => el.innerHTML);
+                    const nombre_final = await page.$eval('#ContentPlaceHolder1_lblNombre', el => el.innerHTML);
+                    const os_final = await page.$eval('#ContentPlaceHolder1_DGOOSS', el => el.innerHTML);
+
+                    console.log(`CUIL Encontrado: ${cuil_final} - ${nombre_final} - ${extractData(os_final)}`);
         
+                    await sleep(1000);
+                }
+                catch(e){
+                    console.log(e)
+                }
+    
                 
+                await page.goto(region);
             }
+            catch(e){
+                console.log(e);
+                await page.goto(region);
+            }
+
+
+        }
 
     }
 
@@ -200,6 +129,86 @@ require('dotenv').config();
 
   await browser.close();
 })();
+
+const typeWithRandomDelay = async (page, selector, text) => {
+    for (const char of text) {
+      await page.type(selector, char);
+      await sleep(Math.floor(Math.random() * 100) + 100); // Espera entre 100ms y 300ms
+    }
+};
+
+const extractData = (html) => {
+    // Parse the HTML
+    const root = parse(html);
+    
+    // Find the second row
+    const row = root.querySelector('tr:nth-child(2)');
+    if (!row) {
+      console.error('No se encontró la fila de datos');
+      return null;
+    }
+  
+    // Extract data from the cells
+    const cells = row.querySelectorAll('td');
+    const codigo = cells[0]?.text.trim() || '';
+    const descripcion = cells[1]?.text.trim() || '';
+    const condicion = cells[2]?.text.trim() || '';
+    const situacion = cells[3]?.text.trim() || '';
+  
+    if (!codigo || !condicion || !situacion || !descripcion) {
+      console.error('No se pudieron extraer todos los datos');
+      return null;
+    }
+  
+    return `${codigo};${condicion};${situacion};${descripcion}`;
+};
+
+async function simulateRandomMouseMovement(page, duration = 5000) {
+    const { width, height } = await page.viewport();
+    const startTime = Date.now();
+  
+    while (Date.now() - startTime < duration) {
+      const randomX = Math.floor(Math.random() * width);
+      const randomY = Math.floor(Math.random() * height);
+  
+      await page.mouse.move(randomX, randomY);
+      await page.waitForTimeout(Math.random() * 200 + 100); // Espera entre 100ms y 300ms
+    }
+  }
+  
+
+async function waitForEitherSelector(page, selector1, selector2, timeout) {
+    return Promise.race([
+      page.waitForSelector(selector1, { timeout }),
+      page.waitForSelector(selector2, { timeout }),
+    ]);
+}
+
+// convert DNI into CUIL
+function calcularCuit(dni, prefijo) {
+    // Prefijo: 20 para hombres, 27 para mujeres
+    const cuitSinVerificador = `${prefijo}${dni}`;
+  
+    // Multiplicadores: se usan en el orden de los dígitos
+    const multiplicadores = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+  
+    let suma = 0;
+    
+    for (let i = 0; i < multiplicadores.length; i++) {
+      suma += parseInt(cuitSinVerificador[i]) * multiplicadores[i];
+    }
+    
+    const resto = suma % 11;
+    let digitoVerificador = 11 - resto;
+  
+    if (digitoVerificador === 11) {
+      digitoVerificador = 0;
+    } else if (digitoVerificador === 10) {
+      digitoVerificador = 9;
+    }
+  
+    return `${cuitSinVerificador}${digitoVerificador}`;
+  }
 
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 

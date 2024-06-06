@@ -124,6 +124,32 @@ async function obtenerResultados(distrito, seccion, mesa) {
     }
 }
 
+async function obtenerResultadosGenerico(anio, distrito, seccion, mesa) {
+    const url = `http://resultados.mininterior.gob.ar/api/resultados/getResultados?anioEleccion=${anio}&tipoRecuento=1&tipoEleccion=2&categoriaId=1&distritoId=${distrito}&seccionId=${seccion}&mesaId=${mesa}`;
+
+    try {
+        const response = await axios.get(url);
+        const resultados = response.data;
+    
+        const objetoResultados = {};
+
+        for (const agr of resultados.valoresTotalizadosPositivos) {
+            let sigla = agr.nombreAgrupacion.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z\s]/g, '').split(' ').map(palabra => palabra[0]?.toLowerCase()).join('');
+            // replace - by nothing
+            sigla = sigla.replace('-', '');
+
+            objetoResultados[`${sigla}_${anio}`] = agr.votosPorcentaje;
+        }
+
+
+        return objetoResultados;
+    } catch (error) {
+        console.error('Error al obtener resultados:', error);
+        return '';
+    }
+}
+
+
 
 function extraerPrimerosDigitos(str) {
     const resultado = str.match(/^\d+/);
@@ -157,4 +183,4 @@ function obtenerIdDistrito(mapa, nombre) {
     return null; // Devuelve null si no se encuentra el nombre
 }
 
-module.exports = { resultados_2023, obtenerResultados, extraerPrimerosDigitos, obtenerIdDistrito };
+module.exports = { resultados_2023, obtenerResultadosGenerico, obtenerResultados, extraerPrimerosDigitos, obtenerIdDistrito };
