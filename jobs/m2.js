@@ -38,7 +38,7 @@ require('dotenv').config();
         format: 'JSONEachRow'
     };
 
-    await queryCh(dropTableInkuebles);
+    //await queryCh(dropTableInkuebles);
 
     const createTable = {
         query:`
