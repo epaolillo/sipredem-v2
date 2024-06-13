@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 const personas = require('./models/personas.js');
-const inmuebles = require('./models/inmuebles.js');
+const { inmuebles, inmuebles2, radios } = require('./models/inmuebles.js');
 const { geo } = require('./models/geo.js');
 const { resultados_2023 } = require('./models/resultados_2023.js');
 require('dotenv').config();
@@ -49,7 +49,7 @@ app.post('/login', (req, res) => {
     if (username === 'admin' && password === 'sueñodedatos') {
         // Establecer una cookie
         res.cookie('sipredem', 'admin', { httpOnly: true }); // Opciones adicionales pueden ser configuradas según la necesidad
-        res.send('Login exitoso: Cookie establecida');
+        res.send({success: true, message: 'Login exitoso'})
     } else {
         res.status(401).send('Credenciales inválidas');
     }
@@ -61,7 +61,8 @@ app.use((req, res, next) => {
     if (sipredemCookie === 'admin') {
         next();  // La cookie existe y tiene el valor 'admin', continua con la siguiente ruta/middleware
     } else {
-        res.status(403).send('Acceso denegado: no tiene las credenciales adecuadas');  // Rechaza la solicitud
+        // Send login page
+        res.sendFile(path.join(__dirname, 'login.html'));
     }
 });
 
@@ -103,9 +104,23 @@ app.get('/resultados_2023', async (req, res) => {
     return resultados_2023(req, res);
 });
 
-app.get('/geo', (req, res) => {
-    return inmuebles(req, res);
+app.get('/geo', async (req, res) => {
+    let inmuebles_ = await inmuebles2(req, res);
+    let radios_ = await radios(req, res);
+    return res.json({inmuebles: inmuebles_, radios: radios_});
 });
+
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'admin' && password === 'sueñodedatos') {
+        res.cookie('sipredem', 'admin', { httpOnly: true });
+        res.send('Login exitoso: Cookie establecida');
+    } else {
+        res.status(401).send('Credenciales inválidas');
+    }
+});
+
+
 
 // Servir archivos estáticos desde el directorio raíz
 app.use(express.static(path.join(__dirname)));

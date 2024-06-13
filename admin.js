@@ -387,7 +387,8 @@ myApp.controller('GeoController', ['$scope', '$http', function($scope, $http) {
 
     $scope.loadData = function() {
         $http.get(`${API}geo`).then(function(response) {
-            $scope.data = response.data;
+            $scope.data = response.data.inmuebles;
+            $scope.radios = response.data.radios;
             $scope.mostrarMapa(); // Ensure to call it as a scope function
         }, function(error) {
             console.error('Error fetching data:', error);
@@ -407,9 +408,6 @@ myApp.controller('GeoController', ['$scope', '$http', function($scope, $http) {
                 zoom: 12
             })
         });
-
-
-        const normalizedm2 = $scope.normalizeArrayValue($scope.data.map(item => item.precioMetroCuadradoCubierto));
 
     
         // Capa de mapa de calor para m2
@@ -469,6 +467,92 @@ myApp.controller('GeoController', ['$scope', '$http', function($scope, $http) {
 
 
 
+    const createPolygonFeature = (barrio) => {
+        const coordinates = barrio.poligono.map(coord => ol.proj.fromLonLat(coord));
+        return new ol.Feature({
+            geometry: new ol.geom.Polygon([coordinates]),
+            name: barrio.name,
+            price: barrio.valor
+        });
+    };
+
+    const createLabelFeature = (barrio) => {
+        const coordinates = barrio.poligono.map(coord => ol.proj.fromLonLat(coord));
+        const centroid = ol.geom.Polygon.fromExtent(new ol.geom.Polygon([coordinates]).getExtent()).getInteriorPoint().getCoordinates();
+        return new ol.Feature({
+            geometry: new ol.geom.Point(centroid),
+            name: barrio.name,
+            price: barrio.valor.toFixed(0)
+        });
+    };
+
+    /*
+    const barrios = [
+        // Ejemplo de datos de barrio
+        { name: 'Barrio 1', price: 1000, coordinates: [[-58.54692979910881, -34.445240420040676], [-58.55692979910881, -34.445240420040676], [-58.55692979910881, -34.455240420040676], [-58.54692979910881, -34.455240420040676]] },
+        // Agrega más barrios aquí
+    ];
+    */
+
+
+    const barrios = $scope.radios;
+    console.log(barrios)
+
+    const barrioFeatures = barrios.map(createPolygonFeature);
+    const labelFeatures = barrios.map(createLabelFeature);
+
+    const vectorSource = new ol.source.Vector({
+        features: [...barrioFeatures, ...labelFeatures]
+    });
+
+    const getColorByValue = (value, minValue, maxValue) => {
+        const ratio = (value - minValue) / (maxValue - minValue);
+        const red = Math.min(255, Math.round(255 * ratio));
+        const blue = Math.min(255, Math.round(255 * (1 - ratio)));
+        return `rgba(${red}, 0, ${blue}, 0.6)`;
+    };
+    
+    const minValue = Math.min(...barrios.map(b => b.valor));
+    const maxValue = Math.max(...barrios.map(b => b.valor));
+    
+    const vectorLayer = new ol.layer.Vector({
+        source: vectorSource,
+        style: (feature) => {
+            if (feature.getGeometry().getType() === 'Point') {
+                return new ol.style.Style({
+                    text: new ol.style.Text({
+                        text: `$${feature.get('price')}`,
+                        scale: 1.5,
+                        fill: new ol.style.Fill({
+                            color: '#000'
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: '#fff',
+                            width: 3
+                        })
+                    })
+                });
+            } else {
+                const value = feature.get('price');
+                const color = getColorByValue(value, minValue, maxValue);
+                return new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#00f',
+                        width: 2
+                    }),
+                    fill: new ol.style.Fill({
+                        color: color
+                    })
+                });
+            }
+        }
+    });
+    
+
+    map.addLayer(vectorLayer);
+
+
+
         // Todos juntos
 
 
@@ -490,7 +574,7 @@ myApp.controller('GeoController', ['$scope', '$http', function($scope, $http) {
         $scope.heatMapLayerM2Total = heatMapLayerM2Total;
         $scope.seguridad = seguridad;
         $scope.pileta = pileta;
-
+        $scope.vectorLayer = vectorLayer;
         
     };
 

@@ -26,6 +26,7 @@
     "node-html-parser": "^6.1.13",
     "path": "^0.12.7",
     "puppeteer": "^22.7.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "yargs": "^17.7.2"
   }
 }
