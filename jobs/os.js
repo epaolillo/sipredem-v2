@@ -11,7 +11,7 @@ const { parse } = require('node-html-parser');
 
 async function obtenerCUILES() {
     const query =  {
-        query: `SELECT DISTINCT NU_MATRICULA, TX_GENERO FROM persona WHERE lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%') AND NU_MATRICULA >= 16000000`,
+        query: `SELECT DISTINCT NU_MATRICULA, TX_GENERO FROM persona WHERE lower(TX_SECCION) LIKE lower('%105 - SAN FERNANDO%') AND NU_MATRICULA >= 16000000 ORDER BY rand()`,
         format: 'JSONEachRow',
     };
 
@@ -19,7 +19,8 @@ async function obtenerCUILES() {
     return resultados
 }
 
-(async () => {
+async function startTunction() {
+
     const browser = await puppeteer.launch({
         // healdess false
         headless: false,
@@ -32,6 +33,19 @@ async function obtenerCUILES() {
         query:`ALTER TABLE padron.persona UPDATE m2 = 0 WHERE 1=1`,
         format: 'JSONEachRow'
     };
+
+
+    // Agergamos columns
+    const siglas_ = ['os_codigo', 'os_descripcion', 'os_condicion', 'os_situacion', 'os_codem'];
+
+    for (const sigla of siglas_) {
+        const queryCrearColumna = {
+            query: `ALTER TABLE padron.persona ADD COLUMN IF NOT EXISTS ${sigla} TEXT `,
+            format: 'JSONEachRow',
+        }
+        await queryCh(queryCrearColumna);
+    }
+
 
     //await queryChWithRetry(resetQuery);
 
@@ -76,7 +90,7 @@ async function obtenerCUILES() {
             // completando cuit 20345553062 en elemento con name ctl00$ContentPlaceHolder1$txtDoc
 
             //await page.type('input[name="ctl00$ContentPlaceHolder1$txtDoc"]', cuil);
-            await typeWithRandomDelay(page, 'input[name="ctl00$ContentPlaceHolder1$txtDoc"]', cuil);
+            await typeWithRandomDelay(page, 'input[name="ctl00$ContentPlaceHolder1$txtDoc"]', cuil.cuil);
     
             // Click en continuar elemento name ctl00$ContentPlaceHolder1$Button1
             await page.click('input[name="ctl00$ContentPlaceHolder1$Button1"]');
@@ -104,7 +118,22 @@ async function obtenerCUILES() {
                     const nombre_final = await page.$eval('#ContentPlaceHolder1_lblNombre', el => el.innerHTML);
                     const os_final = await page.$eval('#ContentPlaceHolder1_DGOOSS', el => el.innerHTML);
 
-                    console.log(`CUIL Encontrado: ${cuil_final} - ${nombre_final} - ${extractData(os_final)}`);
+                    // os_final = table, primer tr encabezados: Codigo, descripcion, condicion, situacion, CODEM
+                    // descomponer os_final la tabla para onbtener estos elementos
+                    const data = extractData(os_final);
+
+
+                    console.log(`CUIL Encontrado: ${cuil_final} - ${nombre_final}`);
+                    console.log(data)
+
+                    // Actualizamos campos os_codigo, os_descripcion, os_condicion, os_situacion, os_codem buscando por DNI 
+                    const query = {
+                        query: `ALTER TABLE padron.persona UPDATE os_codigo = '${data.codigo}', os_descripcion = '${data.descripcion}', os_condicion = '${data.condicion}', os_situacion = '${data.situacion}', os_codem = '${data.codem}' WHERE NU_MATRICULA = ${cuil.dni}`,
+                        format: 'JSONEachRow',
+                    };
+                    await queryCh(query);
+
+
         
                     await sleep(1000);
                 }
@@ -128,7 +157,16 @@ async function obtenerCUILES() {
 
 
   await browser.close();
-})();
+}
+
+try{
+    startTunction();
+
+}
+catch(e){
+    console.log(e);
+    startTunction();
+}
 
 const typeWithRandomDelay = async (page, selector, text) => {
     for (const char of text) {
@@ -154,13 +192,14 @@ const extractData = (html) => {
     const descripcion = cells[1]?.text.trim() || '';
     const condicion = cells[2]?.text.trim() || '';
     const situacion = cells[3]?.text.trim() || '';
+    const codem = cells[4]?.text.trim() || '';
   
     if (!codigo || !condicion || !situacion || !descripcion) {
       console.error('No se pudieron extraer todos los datos');
       return null;
     }
   
-    return `${codigo};${condicion};${situacion};${descripcion}`;
+    return { codigo: codigo, descripcion: descripcion, condicion: condicion, situacion: situacion, codem: codem };
 };
 
 async function simulateRandomMouseMovement(page, duration = 5000) {
@@ -207,7 +246,7 @@ function calcularCuit(dni, prefijo) {
       digitoVerificador = 9;
     }
   
-    return `${cuitSinVerificador}${digitoVerificador}`;
+    return { cuil:`${cuitSinVerificador}${digitoVerificador}`, dni: dni };
   }
 
 const sleep = ms => new Promise(res => setTimeout(res, ms));

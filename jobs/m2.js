@@ -278,7 +278,7 @@ function printEntity(entity) {
 async function scrapeData(page) {
 
     // Extraer todos los links de los items
-    const itemLinks = await page.$$eval('.ui-search-item__group__element.ui-search-item__title-grid a', items => items.map(item => item.href));
+    const itemLinks = await page.$$eval('.andes-card a.poly-component__title', items => items.map(item => item.href));
   
     let results = [];
 

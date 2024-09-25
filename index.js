@@ -172,7 +172,47 @@ async function normalizarUnLoteDirecciones(direcciones) {
 
 }
 
+app.get('/capa/:nombre', async (req, res) => {
+    const nombreCapa = req.params.nombre;
 
+    try {
+        const query = `
+            SELECT coordenadas
+            FROM layers
+            WHERE layer = ?
+        `;
+
+        const result = await clickhouse.query({
+            query,
+            params: [nombreCapa],
+            format: 'JSONEachRow'
+        }).toPromise();
+
+        if (result.length === 0) {
+            return res.status(404).send({ error: 'Capa no encontrada' });
+        }
+
+        // Construcción del GeoJSON
+        const features = result.map(row => ({
+            type: "Feature",
+            geometry: {
+                type: "Polygon",
+                coordinates: JSON.parse(row.coordenadas) // Asumiendo que las coordenadas están en formato JSON
+            },
+            properties: {}
+        }));
+
+        const geojson = {
+            type: "FeatureCollection",
+            features: features
+        };
+
+        res.json(geojson);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ error: 'Error al consultar la base de datos' });
+    }
+});
 
 
 function runJob(jobs) {
