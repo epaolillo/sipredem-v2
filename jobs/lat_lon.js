@@ -35,7 +35,8 @@ async function obtenerDomicilios() {
         console.log(`Tenemos un total de ${direccionesDB.length} direcciones para procesar.`);
 
         for (let i = 0; i < direccionesDB.length; i++) {
-            const dir = direccionesDB[i].direccion;
+            // replace dot by space
+            const dir = direccionesDB[i].direccion.replace(/\b\w\.\s*/g, '').replace(/\./g, " ");
 
             try {
                 const resultado = await geocodificarDireccion(dir);
